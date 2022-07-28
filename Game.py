@@ -1,6 +1,14 @@
 """"Create Flappy Bird's Game :)"""
 """Check the README"""
 
+
+"""TO DO LIST
+=> Make a 'fondu' on images
+=> Change images because there are ugly...
+=> Add pause button and the pause_menu
+"""
+
+
 #ALL CLASES AND FUNCTIONS
 class Bird:
     def __init__(self, x, y, screen):
@@ -11,13 +19,15 @@ class Bird:
         self.max_rota = 25 # Rotation's maximum
         self.rota = 0 # Current rota
         self.rota_speed = 10 # Speed's rota
-        self.anim_time = 3 # Time of animation
+        self.anim_time = 5 # Time of animation
         self.tick_count = 0 # Time clock
         self.init_y = self.y # Save init y position
         self.bird_image = [bird_1_image, bird_2_image, bird_3_image] # List of bird's image
         self.image = self.bird_image[0] # Current image
         self.image_count = 0 # Count image
         self.score = 0
+        self.best_score = 0
+        self.first_move = False
 
     def jump(self):
         self.speed = - 10.5 # Negative because mooves Up !
@@ -47,15 +57,15 @@ class Bird:
     def new_image_and_rect(self):
         self.image_count += 1
 
-        if self.image_count < self.anim_time: # If 0 < self.image_count < 3
+        if self.image_count < self.anim_time: # If 0 < self.image_count < 5
             self.image = self.bird_image[0]
-        elif self.image_count < self.anim_time * 2: # If 3 < self.image_count < 6
+        elif self.image_count < self.anim_time * 2: # If 5 < self.image_count < 10
             self.image = self.bird_image[1]
-        elif self.image_count < self.anim_time * 3: # If 6 < self.image_count < 9
+        elif self.image_count < self.anim_time * 3: # If 10 < self.image_count < 15
             self.image = self.bird_image[2]
-        elif self.image_count < self.anim_time * 4: # If 9 < self.image_count < 12
+        elif self.image_count < self.anim_time * 4: # If 15 < self.image_count < 20
             self.image = self.bird_image[1]
-        elif self.image_count == self.anim_time * 4 + 1: # If self.image_count = 13
+        elif self.image_count == self.anim_time * 4 + 1: # If self.image_count = 21
             #Initialisation image and image_count
             self.image = self.bird_image[0]
             self.image_count = 0
@@ -75,8 +85,10 @@ class Bird:
     def display_score(self):
         white_color = (255, 255, 255)
         font = pygame.font.SysFont("comicsans", 50)
-        text = font.render("Score : {}".format(self.score), 1, white_color)
-        self.screen.blit(text, (width - text.get_width() - 10, 10))
+        text_score = font.render("Score : {}".format(self.score), 1, white_color)
+        text_best_score = font.render("Best Score : {}".format(self.best_score), 1, white_color)
+        self.screen.blit(text_score, (width - text_score.get_width() - 10, 10))
+        self.screen.blit(text_best_score, (10, 10))
 
     def collide_ground(self, new_rect):
         "Detect if the bird collide with the ground => True"
@@ -130,13 +142,12 @@ class Pipe:
         self.pos_pipe_down[0] -= self.speed
         pipe_down_rect = self.update_pos(self.pos_pipe_down[0], self.pos_pipe_down[1], self.pipe_down_image)
 
-        return [pipe_up_rect, pipe_down_rect]
+        return pipe_up_rect, pipe_down_rect
 
-    def draw(self):
+    def draw(self, rect_pipe_x, rect_pipe_y):
         "Draw bottom and top pipe correctly on the screen"
-        rect_pipe = self.moove_alone()
-        self.screen.blit(self.pipe_up_image, rect_pipe[0])
-        self.screen.blit(self.pipe_down_image, rect_pipe[1])
+        self.screen.blit(self.pipe_up_image, rect_pipe_x)
+        self.screen.blit(self.pipe_down_image, rect_pipe_y)
 
     def need_new_pipe(self):
         "Detect if a new pipe must be engaged"
@@ -178,6 +189,12 @@ class Game:
         self.screen = screen
         self.bird = bird
         self.list_pipe = [pipe] # List of pipe
+        self.dico_pipe_pos = {pipe : 0}
+
+        self.begin_menu = True
+        self.end_menu = False
+        self.transition_end_menu = False
+        self.game = False
         self.running = True
 
     def move_ground(self):
@@ -215,8 +232,25 @@ class Game:
         for pipe in add_list:
             self.list_pipe.append(pipe)
 
+    def end_menu(self, collision):
+        exit = False
+        while True:
+            # Finish the movement of the bird (Fall)
+            if collision == "pipe" and not exit:
+                self.bird.move()
+                rotated_image, new_rect = self.bird.new_image_and_rect()[0], self.bird.new_image_and_rect()[1]
+                self.bird.draw(rotated_image, new_rect)
+                if self.bird.collide_ground(new_rect):
+                    exit = True
+            pygame.display.update()
+
+
     def run(self):
         clock = pygame.time.Clock()
+        click_count = 0
+        first_iteration_in_begin_menu = True
+        speed_animation_begin_menu = 4
+        pos_y_flappy_bird = height / 4
         while self.running:
 
             clock.tick(30) # 30 Images Per Second (= 30 FPS)
@@ -225,31 +259,109 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                if event.type == pygame.KEYDOWN:
+                if event.type == pygame.KEYDOWN and not self.end_menu and not self.begin_menu:
                     if not event.key == pygame.K_ESCAPE: # Idk why 'not'...
-                        self.bird.jump()
+                        self.bird.first_move = True
+                        if not self.transition_end_menu:
+                            self.bird.jump()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pos_mouse = pygame.mouse.get_pos()
+                    if start_button_rect.collidepoint(pos_mouse[0], pos_mouse[1]):
+                        # Initialisation for closing the begin_menu and open the game
+                        self.begin_menu = False
+                        self.game = True
+                        self.bird.x = width / 2 - bird_dimention_rect_x / 2 - 100
+                        self.bird.y = height / 2 - bird_dimention_rect_y / 2
 
             #Displays Game
-            self.bird.move()
 
-            self.screen.blit(background_image, background_rect)
+            if self.begin_menu: # If we are in the begin menu
 
-            self.update_list_pipe()
-            for pipe in self.list_pipe:
-                pipe.draw()
-                if pipe.collide_bird():
-                    self.reset_game()
+                #Display images
+                self.screen.blit(background_image, background_rect)
+                self.screen.blit(ground1_image, ground1_rect)
+                self.screen.blit(ground2_image, ground2_rect)
+                self.move_ground()
+                self.screen.blit(flappy_bird_image, flappy_bird_rect)
+                self.screen.blit(start_button_image, start_button_rect)
+                self.screen.blit(score_button_image, score_button_rect)
+                rotated_image, new_rect = self.bird.new_image_and_rect()[0], self.bird.new_image_and_rect()[1]
+                self.bird.draw(rotated_image, new_rect)
 
-            self.bird.display_score()
+                #Update bird's position and title's position
+                click_count += 1
 
-            self.screen.blit(ground1_image, ground1_rect)
-            self.screen.blit(ground2_image, ground2_rect)
-            self.move_ground()
+                if first_iteration_in_begin_menu:
+                    if click_count % 10 == 0:  # after 0.33 second
+                        speed_animation_begin_menu *= -1
+                        first_iteration_in_begin_menu = False
+                        click_count = 0
+                else:
+                    if click_count % 20 == 0:  # after 0.66 second
+                        speed_animation_begin_menu *= -1
+                self.bird.y += speed_animation_begin_menu
+                pos_y_flappy_bird += speed_animation_begin_menu
+                flappy_bird_rect.topleft = (width / 12, pos_y_flappy_bird)
 
-            rotated_image, new_rect = self.bird.new_image_and_rect()[0], self.bird.new_image_and_rect()[1]
-            self.bird.draw(rotated_image, new_rect)
-            if self.bird.collide_ground(new_rect):
-                self.reset_game()
+
+            if self.game: # If we are in the game
+
+                #Update at every moment
+                self.screen.blit(background_image, background_rect)
+                self.screen.blit(ground1_image, ground1_rect)
+                self.screen.blit(ground2_image, ground2_rect)
+
+                #If game is running and the player is not dead
+                if not self.transition_end_menu:
+                    self.move_ground()
+
+                    if not self.bird.first_move:  # If the player hasn't moved yet
+                        self.screen.blit(tap_bird_image, tap_bird_rect)
+                        self.screen.blit(get_ready_image, get_ready_rect)
+
+                    if self.bird.first_move:  # If the player has already moved once
+
+                        self.bird.move()
+
+                        self.update_list_pipe()
+                        for pipe in self.list_pipe:
+                            rect_x, rect_y = pipe.moove_alone()
+                            self.dico_pipe_pos[pipe] = 0
+                            self.dico_pipe_pos[pipe] = [rect_x, rect_y]
+                            pipe.draw(rect_x, rect_y)
+                            if pipe.collide_bird():
+                                if self.bird.score > self.bird.best_score:
+                                    self.bird.best_score = self.bird.score
+                                self.transition_end_menu = True
+
+                        if self.bird.collide_ground(new_rect):
+                            if self.bird.score > self.bird.best_score:
+                                self.bird.best_score = self.bird.score
+                            self.game = False
+                            self.end_menu = True
+
+                # If the player is dead => Transition to the end_menu (IF PLAYER HIT PIPE, NOT GROUND)
+                if self.transition_end_menu: # The movement of the bird until he fall on the ground
+                    self.bird.move()
+
+                    for pipe in self.dico_pipe_pos:
+                        self.list_pipe[0].draw(self.dico_pipe_pos[pipe][0], self.dico_pipe_pos[pipe][1]) # Same coord than when the player hit the pipe
+
+                    if self.bird.collide_ground(new_rect):
+                        self.game = False
+                        self.end_menu = True
+
+                rotated_image, new_rect = self.bird.new_image_and_rect()[0], self.bird.new_image_and_rect()[1]
+                self.bird.draw(rotated_image, new_rect)
+                self.bird.display_score() # Must be after the pipe's draw
+
+
+            if self.end_menu:  # If we are in the end menu
+                self.screen.blit(background_image, background_rect)
+                self.screen.blit(ground1_image, ground1_rect)
+                self.screen.blit(ground2_image, ground2_rect)
+                rotated_image, new_rect = self.bird.new_image_and_rect()[0], self.bird.new_image_and_rect()[1]
+                self.bird.draw(rotated_image, new_rect)
 
             pygame.display.update()
 
@@ -266,7 +378,7 @@ screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Flappy Bird IA")
 
 #All Classes
-bird = Bird(width / 2 - bird_dimention_rect_x / 2, height / 2 - bird_dimention_rect_y / 2, screen) # 80, 60 = dimension_rect_x, dimension_rect_y
+bird = Bird(width - 80 - 40, height / 4 + 40, screen) #width / 2 - bird_dimention_rect_x / 2, height / 2 - bird_dimention_rect_y / 2, screen
 pipe = Pipe(screen, bird, pipe_image)
 game = Game(screen, bird, pipe)
 
