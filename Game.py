@@ -111,6 +111,7 @@ class Pipe:
         self.dist_ground = int(self.dimention_y_pipe - (5.7 * (height / 7))) # Height of ground
         self.speed = 8 # Pipe's speed
         self.passed_middle = False
+        self.passed_pipe = False
 
         self.pipe_up_image = pipe_image
         self.pos_pipe_up= [width, self.set_height()]
@@ -162,6 +163,14 @@ class Pipe:
         "Detect if destroy's decision the pipe must be taken"
         if self.pos_pipe_up[0] <= - self.dimension_x_pipe:
             return True
+        return False
+
+    def bird_deserve_score(self):
+        "Return True if the bird has passed completely the pipe, False otherwise"
+        if not self.passed_pipe:
+            if self.pos_pipe_up[0] + self.dimension_x_pipe <= width / 2 - bird_dimention_rect_x / 2 - 100:
+                self.passed_pipe = True
+                return True
         return False
 
     def collide_bird(self):
@@ -223,7 +232,6 @@ class Game:
         for pipe in self.list_pipe:
             if pipe.need_new_pipe():
                 add_list.append(Pipe(self.screen, self.bird, pipe_image))
-                self.bird.score += 1
             if pipe.need_destroy_pipe():
                 rem_list.append(pipe)
 
@@ -231,18 +239,6 @@ class Game:
             self.list_pipe.remove(pipe)
         for pipe in add_list:
             self.list_pipe.append(pipe)
-
-    def end_menu(self, collision):
-        exit = False
-        while True:
-            # Finish the movement of the bird (Fall)
-            if collision == "pipe" and not exit:
-                self.bird.move()
-                rotated_image, new_rect = self.bird.new_image_and_rect()[0], self.bird.new_image_and_rect()[1]
-                self.bird.draw(rotated_image, new_rect)
-                if self.bird.collide_ground(new_rect):
-                    exit = True
-            pygame.display.update()
 
 
     def run(self):
@@ -266,12 +262,22 @@ class Game:
                             self.bird.jump()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pos_mouse = pygame.mouse.get_pos()
-                    if start_button_rect.collidepoint(pos_mouse[0], pos_mouse[1]):
-                        # Initialisation for closing the begin_menu and open the game
-                        self.begin_menu = False
-                        self.game = True
-                        self.bird.x = width / 2 - bird_dimention_rect_x / 2 - 100
-                        self.bird.y = height / 2 - bird_dimention_rect_y / 2
+                    if self.begin_menu:
+                        if start_button_rect.collidepoint(pos_mouse[0], pos_mouse[1]):
+                            # Initialisation for closing the begin_menu and open the game
+                            self.begin_menu = False
+                            self.game = True
+                            self.bird.x = width / 2 - bird_dimention_rect_x / 2 - 100
+                            self.bird.y = height / 2 - bird_dimention_rect_y / 2
+                    if self.end_menu:
+                        if ok_button_rect.collidepoint(pos_mouse[0], pos_mouse[1]):
+                            self.end_menu = False
+                            self.begin_menu = True
+                            self.bird = Bird(width - 80 - 40, height / 4 + 40, screen)
+                            self.bird.first_move = False
+                            self.list_pipe = [Pipe(self.screen, self.bird, pipe_image)]
+                            self.dico_pipe_pos = {}
+
 
             #Displays Game
 
@@ -308,8 +314,6 @@ class Game:
 
                 #Update at every moment
                 self.screen.blit(background_image, background_rect)
-                self.screen.blit(ground1_image, ground1_rect)
-                self.screen.blit(ground2_image, ground2_rect)
 
                 #If game is running and the player is not dead
                 if not self.transition_end_menu:
@@ -325,6 +329,10 @@ class Game:
 
                         self.update_list_pipe()
                         for pipe in self.list_pipe:
+
+                            if pipe.bird_deserve_score():
+                                self.bird.score += 1
+
                             rect_x, rect_y = pipe.moove_alone()
                             self.dico_pipe_pos[pipe] = 0
                             self.dico_pipe_pos[pipe] = [rect_x, rect_y]
@@ -340,6 +348,12 @@ class Game:
                             self.game = False
                             self.end_menu = True
 
+                    rotated_image, new_rect = self.bird.new_image_and_rect()[0], self.bird.new_image_and_rect()[1]
+                    self.bird.draw(rotated_image, new_rect)
+                    self.bird.display_score()  # Must be after the pipe's draw
+                    self.screen.blit(ground1_image, ground1_rect)
+                    self.screen.blit(ground2_image, ground2_rect)
+
                 # If the player is dead => Transition to the end_menu (IF PLAYER HIT PIPE, NOT GROUND)
                 if self.transition_end_menu: # The movement of the bird until he fall on the ground
                     self.bird.move()
@@ -347,21 +361,32 @@ class Game:
                     for pipe in self.dico_pipe_pos:
                         self.list_pipe[0].draw(self.dico_pipe_pos[pipe][0], self.dico_pipe_pos[pipe][1]) # Same coord than when the player hit the pipe
 
+                    rotated_image, new_rect = self.bird.new_image_and_rect()[0], self.bird.new_image_and_rect()[1]
+                    self.bird.draw(rotated_image, new_rect)
+                    self.bird.display_score()  # Must be after the pipe's draw
+                    self.screen.blit(ground1_image, ground1_rect)
+                    self.screen.blit(ground2_image, ground2_rect)
+
                     if self.bird.collide_ground(new_rect):
                         self.game = False
                         self.end_menu = True
+                        self.transition_end_menu = False
 
-                rotated_image, new_rect = self.bird.new_image_and_rect()[0], self.bird.new_image_and_rect()[1]
-                self.bird.draw(rotated_image, new_rect)
-                self.bird.display_score() # Must be after the pipe's draw
+                pygame.display.update()
 
 
             if self.end_menu:  # If we are in the end menu
                 self.screen.blit(background_image, background_rect)
+                for pipe in self.dico_pipe_pos:
+                    self.list_pipe[0].draw(self.dico_pipe_pos[pipe][0], self.dico_pipe_pos[pipe][1])  # Same coord than when the player hit the pipe
+                self.bird.draw(rotated_image, new_rect)
                 self.screen.blit(ground1_image, ground1_rect)
                 self.screen.blit(ground2_image, ground2_rect)
-                rotated_image, new_rect = self.bird.new_image_and_rect()[0], self.bird.new_image_and_rect()[1]
-                self.bird.draw(rotated_image, new_rect)
+
+                #Add other images
+                self.screen.blit(game_over_image, game_over_rect)
+                self.screen.blit(ok_button_image, ok_button_rect)
+                self.screen.blit(share_button_image, share_button_rect)
 
             pygame.display.update()
 

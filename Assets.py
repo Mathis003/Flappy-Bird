@@ -29,6 +29,18 @@ start_button = Asset("assets/start_button.jpg", (width / 3.5, height / 15), [wid
 score_button = Asset("assets/score_button.jpg", (width / 3.5, height / 15), [4.8 * (width / 8), 4.3 * (height / 6)])
 tap_bird = Asset("assets/tap_bird-removebg-preview.png", (300, height / 4), [270, 500])
 get_ready = Asset("assets/get_ready.png", (500, 100), [150, 300])
+game_over = Asset("assets/game_over.png", (600, 150), [100, 200])
+ok_button = Asset("assets/ok_button.png",  (width / 3.5, height / 15), [width / 8, 4.3 * (height / 6)])
+share_button = Asset("assets/share_button.png", (width / 3.5, height / 15), [4.8 * (width / 8), 4.3 * (height / 6)])
+
+game_over_image = game_over.loaded_image()
+game_over_rect = game_over.get_image_rect()
+
+ok_button_image = ok_button.loaded_image()
+ok_button_rect = ok_button.get_image_rect()
+
+share_button_image = share_button.loaded_image()
+share_button_rect = share_button.get_image_rect()
 
 get_ready_image = get_ready.loaded_image()
 get_ready_rect = get_ready.get_image_rect()
