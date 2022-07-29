@@ -407,6 +407,5 @@ bird = Bird(width - 80 - 40, height / 4 + 40, screen) #width / 2 - bird_dimentio
 pipe = Pipe(screen, bird, pipe_image)
 game = Game(screen, bird, pipe)
 
-
 if __name__ == '__main__':
     game.run() # Run the game
