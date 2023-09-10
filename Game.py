@@ -29,8 +29,8 @@ class Game:
 
     def reset_game(self):
         "Reset the game and reinitialise all"
-        self.bird.x = WIDTH / 2 - bird_dimention_rect_x / 2
-        self.bird.y = HEIGHT / 2 - bird_dimention_rect_y / 2
+        self.bird.x = WIDTH / 2 - bird_dimension_rect_x / 2
+        self.bird.y = HEIGHT / 2 - bird_dimension_rect_y / 2
         self.score.score = 0
         self.list_pipe = []
         self.list_pipe.append(Pipe(self.screen, self.bird, pipe_image))
@@ -83,8 +83,8 @@ class Game:
                             # Initialisation for closing the begin_menu and open the game
                             self.begin_menu = False
                             self.game = True
-                            self.bird.x = WIDTH / 2 - bird_dimention_rect_x / 2 - 100
-                            self.bird.y = HEIGHT / 2 - bird_dimention_rect_y / 2
+                            self.bird.x = WIDTH / 2 - bird_dimension_rect_x / 2 - 100
+                            self.bird.y = HEIGHT / 2 - bird_dimension_rect_y / 2
                     if self.end_menu:
                         if ok_button_rect.collidepoint(pos_mouse[0], pos_mouse[1]):
                             self.end_menu = False

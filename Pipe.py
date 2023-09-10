@@ -5,11 +5,11 @@ class Pipe:
     def __init__(self, screen, bird, pipe_image):
         self.screen = screen
         self.bird = bird
-        self.dimention_y_pipe = 1000
+        self.dimension_y_pipe = 1000
         self.dimension_x_pipe = 140
         self.distance = HEIGHT / 6  # Distance between two pipes
         self.dist_min = 300 # Minimal distance near wall / ground
-        self.dist_ground = int(self.dimention_y_pipe - (5.7 * (HEIGHT / 7))) # Height of ground
+        self.dist_ground = int(self.dimension_y_pipe - (5.7 * (HEIGHT / 7))) # Height of ground
         self.speed = 8 # Pipe's speed
         self.passed_middle = False
         self.passed_pipe = False
@@ -17,12 +17,12 @@ class Pipe:
         self.pipe_up_image = pipe_image
         self.pos_pipe_up= [WIDTH, self.set_height()]
         self.pipe_down_image = pygame.transform.rotate(pipe_image, 180)
-        self.pos_pipe_down = [WIDTH, self.pos_pipe_up[1] - self.dimention_y_pipe - self.distance]
+        self.pos_pipe_down = [WIDTH, self.pos_pipe_up[1] - self.dimension_y_pipe - self.distance]
 
     def reset_position(self):
         "Reset positions of the pipes"
         self.pos_pipe_up = [WIDTH, self.set_height()]
-        self.pos_pipe_down = [WIDTH, self.pos_pipe_up[1] - self.dimention_y_pipe - self.distance]
+        self.pos_pipe_down = [WIDTH, self.pos_pipe_up[1] - self.dimension_y_pipe - self.distance]
 
     def set_height(self):
         """Generate random number between two specific numbers for 'Up' pipe's height.
@@ -69,7 +69,7 @@ class Pipe:
     def bird_deserve_score(self):
         "Return True if the bird has passed completely the pipe, False otherwise"
         if not self.passed_pipe:
-            if self.pos_pipe_up[0] + self.dimension_x_pipe <= WIDTH / 2 - bird_dimention_rect_x / 2 - 100:
+            if self.pos_pipe_up[0] + self.dimension_x_pipe <= WIDTH / 2 - bird_dimension_rect_x / 2 - 100:
                 self.passed_pipe = True
                 return True
         return False
