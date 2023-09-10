@@ -7,9 +7,12 @@ class Score:
         self.score = 0
 
     def readBestScore(self):
-        with open("BestScore.txt", "r") as file:
-            best_score = file.read()
-            return best_score
+        try:
+            with open("BestScore.txt", "r") as file:
+                best_score = file.read()
+                return best_score
+        except:
+            return "0"
     
     def writeBestScore(self, best_score):
         with open("BestScore.txt", "w") as file:
