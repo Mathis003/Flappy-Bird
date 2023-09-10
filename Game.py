@@ -29,8 +29,8 @@ class Game:
 
     def reset_game(self):
         "Reset the game and reinitialise all"
-        self.bird.x = WIDTH / 2 - bird_dimension_rect_x / 2
-        self.bird.y = HEIGHT / 2 - bird_dimension_rect_y / 2
+        self.bird.x = WIDTH / 2 - self.bird.dimension_x / 2
+        self.bird.y = HEIGHT / 2 - self.bird.dimension_y / 2
         self.score.score = 0
         self.list_pipe = []
         self.list_pipe.append(Pipe(self.screen, self.bird, pipe_image))
@@ -83,8 +83,8 @@ class Game:
                             # Initialisation for closing the begin_menu and open the game
                             self.begin_menu = False
                             self.game = True
-                            self.bird.x = WIDTH / 2 - bird_dimension_rect_x / 2 - 100
-                            self.bird.y = HEIGHT / 2 - bird_dimension_rect_y / 2
+                            self.bird.x = WIDTH / 2 - self.bird.dimension_x / 2 - 100
+                            self.bird.y = HEIGHT / 2 - self.bird.dimension_y / 2
                     if self.end_menu:
                         if ok_button_rect.collidepoint(pos_mouse[0], pos_mouse[1]):
                             self.end_menu = False
@@ -107,8 +107,7 @@ class Game:
                 self.screen.blit(flappy_bird_image, flappy_bird_rect)
                 self.screen.blit(start_button_image, start_button_rect)
                 self.screen.blit(score_button_image, score_button_rect)
-                rotated_image, new_rect = self.bird.new_image_and_rect()[0], self.bird.new_image_and_rect()[1]
-                self.bird.draw(rotated_image, new_rect)
+                self.bird.update_animation()
 
                 # Update bird's position and title's position
                 click_count += 1
@@ -159,14 +158,13 @@ class Game:
                                 self.score.score = 0
                                 self.transition_end_menu = True
 
-                        if self.bird.collide_ground(new_rect):
+                        if self.bird.collide_ground():
                             self.score.addBestScore()
                             self.score.score = 0
                             self.game = False
                             self.end_menu = True
 
-                    rotated_image, new_rect = self.bird.new_image_and_rect()[0], self.bird.new_image_and_rect()[1]
-                    self.bird.draw(rotated_image, new_rect)
+                    self.bird.update_animation()
                     self.score.display_score()  # Must be after the pipe's draw
                     self.screen.blit(ground1_image, ground1_rect)
                     self.screen.blit(ground2_image, ground2_rect)
@@ -178,13 +176,12 @@ class Game:
                     for pipe in self.dico_pipe_pos:
                         self.list_pipe[0].draw(self.dico_pipe_pos[pipe][0], self.dico_pipe_pos[pipe][1]) # Same coord than when the player hit the pipe
 
-                    rotated_image, new_rect = self.bird.new_image_and_rect()[0], self.bird.new_image_and_rect()[1]
-                    self.bird.draw(rotated_image, new_rect)
+                    self.bird.update_animation()
                     self.score.display_score()  # Must be after the pipe's draw
                     self.screen.blit(ground1_image, ground1_rect)
                     self.screen.blit(ground2_image, ground2_rect)
 
-                    if self.bird.collide_ground(new_rect):
+                    if self.bird.collide_ground():
                         self.game = False
                         self.end_menu = True
                         self.transition_end_menu = False
@@ -194,7 +191,7 @@ class Game:
                 self.screen.blit(background_image, background_rect)
                 for pipe in self.dico_pipe_pos:
                     self.list_pipe[0].draw(self.dico_pipe_pos[pipe][0], self.dico_pipe_pos[pipe][1])  # Same coord than when the player hit the pipe
-                self.bird.draw(rotated_image, new_rect)
+                self.bird.update_animation()
                 self.screen.blit(ground1_image, ground1_rect)
                 self.screen.blit(ground2_image, ground2_rect)
                 self.screen.blit(game_over_image, game_over_rect)

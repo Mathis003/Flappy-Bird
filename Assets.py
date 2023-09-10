@@ -4,6 +4,10 @@ import pygame
 
 WIDTH, HEIGHT = 800, 1200
 WHITE = (255, 255, 255)
+
+INIT_POS_BIRD_X = 17/20 * WIDTH
+INIT_POS_BIRD_Y = 17/60 * HEIGHT
+
 SPEED_GROUND = 8
 
 class Asset:
@@ -41,13 +45,12 @@ ground2_image = grounds[1].loaded_image()
 ground1_rect = grounds[0].get_image_rect()
 ground2_rect = grounds[1].get_image_rect()
 
+
 birds = [Asset("assets/game/bird/bird1.png", (80, 60), [WIDTH - 80 - 20, HEIGHT / 4]),
          Asset("assets/game/bird/bird2.png", (80, 60), [WIDTH - 80 - 20, HEIGHT / 4]),
          Asset("assets/game/bird/bird3.png", (80, 60), [WIDTH - 80 - 20, HEIGHT / 4])
         ]
-bird_1_image = birds[0].loaded_image()
-bird_2_image = birds[1].loaded_image()
-bird_3_image = birds[2].loaded_image()
+
 bird_1_rect = birds[0].get_image_rect()
 bird_2_rect = birds[1].get_image_rect()
 bird_3_rect = birds[2].get_image_rect()
@@ -90,9 +93,6 @@ share_button_rect = share_button.get_image_rect()
 
 
 # All dimension_rect
-
-bird_dimension_rect_x = 80
-bird_dimension_rect_y = 60
 
 ground_dimension_rect_x = WIDTH
 ground_dimension_rect_y = HEIGHT / 5
