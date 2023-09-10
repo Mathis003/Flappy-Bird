@@ -1,14 +1,9 @@
 from Assets import *
 
 class Bird:
-    def __init__(self, x, y, screen):
+    def __init__(self, x, y):
 
         ## CONSTANTS
-
-        self.screen = screen
-
-        self.dimension_x = 80
-        self.dimension_y = 60
         
         self.speed = 0
 
@@ -100,7 +95,7 @@ class Bird:
         # Display the new image with the good rotation and the good position
         rotated_image = pygame.transform.rotate(self.image, self.rota)
         self.rect = rotated_image.get_rect(center=self.image.get_rect(topleft=(self.x, self.y)).center)
-        self.screen.blit(rotated_image, self.rect)
+        screen.blit(rotated_image, self.rect)
 
     def collide_ground(self):
         if self.rect.colliderect(ground1_rect) or self.rect.colliderect(ground2_rect):

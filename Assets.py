@@ -5,10 +5,15 @@ import pygame
 WIDTH, HEIGHT = 800, 1200
 WHITE = (255, 255, 255)
 
-INIT_POS_BIRD_X = 17/20 * WIDTH
-INIT_POS_BIRD_Y = 17/60 * HEIGHT
+DIMENSION_BIRD_X = 80
+DIMENSION_BIRD_Y = 60
+
+INIT_POS_BIRD_X = (WIDTH - DIMENSION_BIRD_X) / 2
+INIT_POS_BIRD_Y = (HEIGHT - DIMENSION_BIRD_Y) / 2
 
 SPEED_GROUND = 8
+
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 class Asset:
     def __init__(self, link_image, dimension, rect):

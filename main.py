@@ -8,12 +8,11 @@ pygame.init()
 
 if __name__ == '__main__':
 
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Flappy Bird")
 
-    bird = Bird(WIDTH - 80 - 40, HEIGHT / 4 + 40, screen)
-    pipe = Pipe(screen, bird, pipe_image)
-    score = Score(screen)
+    bird = Bird(INIT_POS_BIRD_X, INIT_POS_BIRD_Y)
+    pipe = Pipe(bird)
+    score = Score()
 
-    game = Game(screen, bird, pipe, score)
+    game = Game(bird, pipe, score)
     game.run() # Run the game

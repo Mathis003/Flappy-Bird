@@ -3,11 +3,11 @@ from Pipe import Pipe
 
 class Game:
 
-    def __init__(self, screen, bird, pipe, score):
-        self.screen = screen
+    def __init__(self, bird, pipe, score):
+        
         self.bird = bird
         self.score = score
-        self.list_pipe = [pipe] # List of pipe
+        self.list_pipe = [pipe]
         self.dico_pipe_pos = {pipe : 0}
 
         self.begin_menu = True
@@ -17,8 +17,13 @@ class Game:
         self.running = True
         self.FPS = 30
 
+        self.clock = pygame.time.Clock()
+        self.click_count = 0
+        self.first_iteration_in_begin_menu = True
+        self.speed_anim_title = 4
+        self.title_pos_y = HEIGHT / 4
+
     def move_ground(self):
-        "Make the ground's animation"
         ground1_rect.x -= SPEED_GROUND
         ground2_rect.x -= SPEED_GROUND
         
@@ -28,41 +33,61 @@ class Game:
             ground2_rect.x = WIDTH
 
     def reset_game(self):
-        "Reset the game and reinitialise all"
-        self.bird.x = WIDTH / 2 - self.bird.dimension_x / 2
-        self.bird.y = HEIGHT / 2 - self.bird.dimension_y / 2
+        self.bird.reset_pos()
         self.score.score = 0
-        self.list_pipe = []
-        self.list_pipe.append(Pipe(self.screen, self.bird, pipe_image))
+        self.list_pipe = [Pipe(self.bird)]
+        self.bird.first_move = False
+        self.dico_pipe_pos = {}
 
     def update_list_pipe(self):
-        rem_list = []
+        remove_list = []
         add_list = []
         for pipe in self.list_pipe:
             if pipe.need_new_pipe():
-                add_list.append(Pipe(self.screen, self.bird, pipe_image))
+                add_list.append(Pipe(self.bird))
             if pipe.need_destroy_pipe():
-                rem_list.append(pipe)
+                remove_list.append(pipe)
 
-        for pipe in rem_list:
+        for pipe in remove_list:
             self.list_pipe.remove(pipe)
         for pipe in add_list:
             self.list_pipe.append(pipe)
+    
+
+    def display_begin_menu(self):
+        screen.blit(background_image, background_rect)
+        screen.blit(ground1_image, ground1_rect)
+        screen.blit(ground2_image, ground2_rect)
+        self.move_ground()
+        screen.blit(flappy_bird_image, flappy_bird_rect)
+        screen.blit(start_button_image, start_button_rect)
+        screen.blit(score_button_image, score_button_rect)
+        self.bird.update_animation()
+        self.click_count += 1
+    
+    def title_animation(self):
+        if self.first_iteration_in_begin_menu:
+            if self.click_count % 10 == 0:  # after 0.33 second
+                self.speed_anim_title *= -1
+                self.first_iteration_in_begin_menu = False
+                self.click_count = 0
+        else:
+            if self.click_count % 20 == 0:  # after 0.66 second
+                self.speed_anim_title *= -1
+
+        self.bird.y += self.speed_anim_title
+        self.title_pos_y += self.speed_anim_title
+        flappy_bird_rect.topleft = (WIDTH / 12, self.title_pos_y)
 
 
     def run(self):
 
-        clock = pygame.time.Clock()
-        click_count = 0
-        first_iteration_in_begin_menu = True
-        speed_animation_begin_menu = 4
-        pos_y_flappy_bird = HEIGHT / 4
-
         while self.running:
 
-            clock.tick(self.FPS)
+            self.clock.tick(self.FPS)
 
-            #Events
+            ### Events
+
             for event in pygame.event.get():
 
                 if event.type == pygame.QUIT:
@@ -83,52 +108,26 @@ class Game:
                             # Initialisation for closing the begin_menu and open the game
                             self.begin_menu = False
                             self.game = True
-                            self.bird.x = WIDTH / 2 - self.bird.dimension_x / 2 - 100
-                            self.bird.y = HEIGHT / 2 - self.bird.dimension_y / 2
+                            self.bird.x -= WIDTH / 8
                     if self.end_menu:
                         if ok_button_rect.collidepoint(pos_mouse[0], pos_mouse[1]):
                             self.end_menu = False
                             self.begin_menu = True
-                            self.bird.reset_pos()
-                            self.bird.first_move = False
-                            self.list_pipe = [Pipe(self.screen, self.bird, pipe_image)]
-                            self.dico_pipe_pos = {}
+                            self.reset_game()
 
 
-            # Displays Game
+            ### Displays Game
 
-            if self.begin_menu: # If we are in the begin menu
+            # If the player is in the begin menu
+            if self.begin_menu:
+                self.display_begin_menu()
+                self.title_animation()
 
-                # Display images
-                self.screen.blit(background_image, background_rect)
-                self.screen.blit(ground1_image, ground1_rect)
-                self.screen.blit(ground2_image, ground2_rect)
-                self.move_ground()
-                self.screen.blit(flappy_bird_image, flappy_bird_rect)
-                self.screen.blit(start_button_image, start_button_rect)
-                self.screen.blit(score_button_image, score_button_rect)
-                self.bird.update_animation()
-
-                # Update bird's position and title's position
-                click_count += 1
-
-                if first_iteration_in_begin_menu:
-                    if click_count % 10 == 0:  # after 0.33 second
-                        speed_animation_begin_menu *= -1
-                        first_iteration_in_begin_menu = False
-                        click_count = 0
-                else:
-                    if click_count % 20 == 0:  # after 0.66 second
-                        speed_animation_begin_menu *= -1
-
-                self.bird.y += speed_animation_begin_menu
-                pos_y_flappy_bird += speed_animation_begin_menu
-                flappy_bird_rect.topleft = (WIDTH / 12, pos_y_flappy_bird)
-
-            if self.game: # If we are in the game
+            # If the player is in the game
+            if self.game:
 
                 # Update at every moment
-                self.screen.blit(background_image, background_rect)
+                screen.blit(background_image, background_rect)
 
                 # If the game is running and the player is not dead
                 if not self.transition_end_menu:
@@ -136,8 +135,8 @@ class Game:
                     self.move_ground()
 
                     if not self.bird.first_move:  # If the player hasn't moved yet
-                        self.screen.blit(tap_bird_image, tap_bird_rect)
-                        self.screen.blit(get_ready_image, get_ready_rect)
+                        screen.blit(tap_bird_image, tap_bird_rect)
+                        screen.blit(get_ready_image, get_ready_rect)
 
                     if self.bird.first_move:  # If the player has already moved once
 
@@ -165,8 +164,8 @@ class Game:
 
                     self.bird.update_animation()
                     self.score.display_score()  # Must be after the pipe's draw
-                    self.screen.blit(ground1_image, ground1_rect)
-                    self.screen.blit(ground2_image, ground2_rect)
+                    screen.blit(ground1_image, ground1_rect)
+                    screen.blit(ground2_image, ground2_rect)
 
                 # If the player is dead => Transition to the end_menu
                 if self.transition_end_menu: # The movement of the bird until he fall on the ground
@@ -177,8 +176,8 @@ class Game:
 
                     self.bird.update_animation()
                     self.score.display_score()  # Must be after the pipe's draw
-                    self.screen.blit(ground1_image, ground1_rect)
-                    self.screen.blit(ground2_image, ground2_rect)
+                    screen.blit(ground1_image, ground1_rect)
+                    screen.blit(ground2_image, ground2_rect)
 
                     if self.bird.collide_ground():
                         self.game = False
@@ -187,14 +186,14 @@ class Game:
 
 
             if self.end_menu:  # If we are in the end menu
-                self.screen.blit(background_image, background_rect)
+                screen.blit(background_image, background_rect)
                 for pipe in self.dico_pipe_pos:
                     self.list_pipe[0].draw(self.dico_pipe_pos[pipe][0], self.dico_pipe_pos[pipe][1])  # Same coord than when the player hit the pipe
                 self.bird.update_animation()
-                self.screen.blit(ground1_image, ground1_rect)
-                self.screen.blit(ground2_image, ground2_rect)
-                self.screen.blit(game_over_image, game_over_rect)
-                self.screen.blit(ok_button_image, ok_button_rect)
-                self.screen.blit(share_button_image, share_button_rect)
+                screen.blit(ground1_image, ground1_rect)
+                screen.blit(ground2_image, ground2_rect)
+                screen.blit(game_over_image, game_over_rect)
+                screen.blit(ok_button_image, ok_button_rect)
+                screen.blit(share_button_image, share_button_rect)
 
             pygame.display.update()

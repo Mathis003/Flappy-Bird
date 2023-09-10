@@ -2,11 +2,10 @@ from Assets import *
 import random
 
 class Pipe:
-    def __init__(self, screen, bird, pipe_image):
+    def __init__(self, bird):
 
         ## CONSTANTS
 
-        self.screen = screen
         self.bird = bird
 
         self.dimension_x = 140
@@ -50,12 +49,12 @@ class Pipe:
         self.draw(self.rect_up, self.rect_down)
 
     def draw(self, rect_pipe_x, rect_pipe_y):
-        self.screen.blit(self.image_up, rect_pipe_x)
-        self.screen.blit(self.image_down, rect_pipe_y)
+        screen.blit(self.image_up, rect_pipe_x)
+        screen.blit(self.image_down, rect_pipe_y)
 
     def need_new_pipe(self):
         if not self.passed_middle:
-            if self.pos_up[0] <= WIDTH / 2 - 10:
+            if self.pos_up[0] <= 39/80 * WIDTH:
                 self.passed_middle = True
                 return True
         return False
@@ -65,7 +64,7 @@ class Pipe:
 
     def bird_passed(self):
         if not self.passed_pipe:
-            if self.pos_up[0] + self.dimension_x <= WIDTH / 2 - self.bird.dimension_x / 2 - 100:
+            if (self.pos_up[0] + self.dimension_x) <= (3/8 * WIDTH - DIMENSION_BIRD_X / 2):
                 self.passed_pipe = True
                 return True
         return False
