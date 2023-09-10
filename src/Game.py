@@ -1,5 +1,5 @@
-from Assets import *
-from Pipe import Pipe
+from src.Assets import *
+from src.Pipe import Pipe
 
 class Game:
 

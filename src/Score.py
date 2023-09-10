@@ -1,4 +1,4 @@
-from Assets import *
+from src.Assets import *
 
 class Score:
 

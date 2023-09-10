@@ -1,7 +1,7 @@
-from Bird import Bird
-from Pipe import Pipe
-from Score import Score
-from Game import *
+from src.Bird import Bird
+from src.Pipe import Pipe
+from src.Score import Score
+from src.Game import *
 
 pygame.font.init()
 pygame.init()
