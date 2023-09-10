@@ -46,11 +46,11 @@ class Pipe:
         self.pos_down[0] -= self.speed
         self.rect_down = self.update_pos(self.pos_down[0], self.pos_down[1], self.image_down)
 
-        self.draw(self.rect_up, self.rect_down)
+        self.draw()
 
-    def draw(self, rect_pipe_x, rect_pipe_y):
-        screen.blit(self.image_up, rect_pipe_x)
-        screen.blit(self.image_down, rect_pipe_y)
+    def draw(self):
+        screen.blit(self.image_up, self.rect_up)
+        screen.blit(self.image_down, self.rect_down)
 
     def need_new_pipe(self):
         if not self.passed_middle:

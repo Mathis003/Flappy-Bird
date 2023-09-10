@@ -8,7 +8,6 @@ class Game:
         self.bird = bird
         self.score = score
         self.list_pipe = [pipe]
-        self.dico_pipe_pos = {pipe : 0}
 
         self.begin_menu = True
         self.transition_end_menu = False
@@ -37,7 +36,6 @@ class Game:
         self.score.score = 0
         self.list_pipe = [Pipe(self.bird)]
         self.bird.first_move = False
-        self.dico_pipe_pos = {}
 
     def update_list_pipe(self):
         remove_list = []
@@ -124,9 +122,8 @@ class Game:
                 self.title_animation()
 
             # If the player is in the game
-            if self.game:
+            elif self.game:
 
-                # Update at every moment
                 screen.blit(background_image, background_rect)
 
                 # If the game is running and the player is not dead
@@ -134,12 +131,13 @@ class Game:
 
                     self.move_ground()
 
-                    if not self.bird.first_move:  # If the player hasn't moved yet
+                    # If the player hasn't moved yet
+                    if not self.bird.first_move:
                         screen.blit(tap_bird_image, tap_bird_rect)
                         screen.blit(get_ready_image, get_ready_rect)
 
-                    if self.bird.first_move:  # If the player has already moved once
-
+                    # If the player has already moved once
+                    else:
                         self.bird.move()
 
                         self.update_list_pipe()
@@ -149,8 +147,6 @@ class Game:
                                 self.score.score += 1
 
                             pipe.move_alone()
-                            self.dico_pipe_pos[pipe] = 0
-                            self.dico_pipe_pos[pipe] = [pipe.rect_up, pipe.rect_down]
                             if pipe.collide_bird():
                                 self.score.addBestScore()
                                 self.score.score = 0
@@ -163,19 +159,21 @@ class Game:
                             self.end_menu = True
 
                     self.bird.update_animation()
-                    self.score.display_score()  # Must be after the pipe's draw
+                    self.score.display_score()
+
                     screen.blit(ground1_image, ground1_rect)
                     screen.blit(ground2_image, ground2_rect)
 
                 # If the player is dead => Transition to the end_menu
-                if self.transition_end_menu: # The movement of the bird until he fall on the ground
+                if self.transition_end_menu: # Correspond to the movement of the bird until he fall on the ground
                     self.bird.move()
 
-                    for pipe in self.dico_pipe_pos:
-                        self.list_pipe[0].draw(self.dico_pipe_pos[pipe][0], self.dico_pipe_pos[pipe][1]) # Same coord than when the player hit the pipe
+                    for pipe in self.list_pipe:
+                        pipe.draw()
 
                     self.bird.update_animation()
-                    self.score.display_score()  # Must be after the pipe's draw
+                    self.score.display_score()
+
                     screen.blit(ground1_image, ground1_rect)
                     screen.blit(ground2_image, ground2_rect)
 
@@ -184,14 +182,18 @@ class Game:
                         self.end_menu = True
                         self.transition_end_menu = False
 
-
-            if self.end_menu:  # If we are in the end menu
+            # If the player is in the end menu
+            else:
                 screen.blit(background_image, background_rect)
-                for pipe in self.dico_pipe_pos:
-                    self.list_pipe[0].draw(self.dico_pipe_pos[pipe][0], self.dico_pipe_pos[pipe][1])  # Same coord than when the player hit the pipe
+
+                for pipe in self.list_pipe:
+                        pipe.draw()
+
                 self.bird.update_animation()
+
                 screen.blit(ground1_image, ground1_rect)
                 screen.blit(ground2_image, ground2_rect)
+
                 screen.blit(game_over_image, game_over_rect)
                 screen.blit(ok_button_image, ok_button_rect)
                 screen.blit(share_button_image, share_button_rect)
