@@ -146,13 +146,12 @@ class Game:
                         self.update_list_pipe()
                         for pipe in self.list_pipe:
 
-                            if pipe.bird_deserve_score():
+                            if pipe.bird_passed():
                                 self.score.score += 1
 
-                            rect_x, rect_y = pipe.move_alone()
+                            pipe.move_alone()
                             self.dico_pipe_pos[pipe] = 0
-                            self.dico_pipe_pos[pipe] = [rect_x, rect_y]
-                            pipe.draw(rect_x, rect_y)
+                            self.dico_pipe_pos[pipe] = [pipe.rect_up, pipe.rect_down]
                             if pipe.collide_bird():
                                 self.score.addBestScore()
                                 self.score.score = 0

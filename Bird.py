@@ -21,7 +21,7 @@ class Bird:
 
         self.bird_image = [birds[0].loaded_image(), birds[1].loaded_image(), birds[2].loaded_image()]
 
-        ## Variables
+        ## VARIABLES
         
         # Current position
         self.x = x
